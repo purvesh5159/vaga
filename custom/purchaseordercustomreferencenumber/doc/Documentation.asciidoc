@@ -1,0 +1,99 @@
+= PURCHASEORDERCUSTOMREFERENCENUMBER =
+:subtitle: PURCHASEORDERCUSTOMREFERENCENUMBER DOCUMENTATION
+:source-highlighter: rouge
+:companyname: Mechencode
+:corpname: Mechencode
+:orgname: Mechencode
+:creator: SuperAdmin
+:title: Documentation of module PurchaseOrderCustomReferenceNumber
+:subject: This document is the document of module PurchaseOrderCustomReferenceNumber.
+:keywords: PurchaseOrderCustomReferenceNumber
+// Date du document :
+:docdate: 2024-08-13
+:toc: manual
+:toc-placement: preamble
+
+
+== TOPIC OF DOCUMENT
+
+This is the documentation of module PurchaseOrderCustomReferenceNumber
+
+
+*Log of versions of document*
+
+[options="header",format="csv"]
+|=== 
+Author, Date, Version
+--- SuperAdmin   ---, 2024-08-13, Version 1.0
+|===
+
+
+[NOTE]
+==============
+This document was generated using Dolibarr ERP CRM process
+==============
+
+
+:toc: manual
+:toc-placement: preamble
+
+
+
+== INTRODUCTION
+
+//include::README.md[]
+__README__
+
+== DATA SPECIFICATIONS
+=== Table of fields with properties for object *PurchaseOrderCustomReferenceNumber* : 
+[options='header',grid=rows,frame=topbot,width=100%,caption=Organisation]
+|===
+|code|type|label|enabled|position|notnull|visible|noteditable|index|default|foreignkey|arrayofkeyval|alwayseditable|validate|searchall|comment|isameasure|css|cssview|csslist|help|showoncombobox|picto
+|*"rowid"*||||1|1|||||||||||||||||
+|*"ref"*||||20|1|||||||||||||||||
+|*label*|varchar(255)|||30|0|||||||||||||||||
+|*"amount"*||||40|0|||||||||||||||||
+|*"qty"*||||45|0|||||||||||||||||
+|*"fk_soc"*||||50|-1|||||||||||||||||
+|*"fk_project"*||||52|-1|||||||||||||||||
+|*"description"*||||60|0|||||||||||||||||
+|*"note_public"*||||61|0|||||||||||||||||
+|*"note_private"*||||62|0|||||||||||||||||
+|*"date_creation"*||||500|1|||||||||||||||||
+|*"tms"*||||501|0|||||||||||||||||
+|*"fk_user_creat"*||||510|1|||||||||||||||||
+|*"fk_user_modif"*||||511|-1|||||||||||||||||
+|*"last_main_doc"*||||600|0|||||||||||||||||
+|*"import_key"*||||1000|-1|||||||||||||||||
+|*"model_pdf"*||||1010|-1|||||||||||||||||
+|*"status"*||||2000|1|||||||||||||||||
+|===
+__ end table for object PurchaseOrderCustomReferenceNumber
+
+
+__DATA_SPECIFICATION__
+
+
+== MATRIX OF PERMISSIONS
+
+[options='header',grid=rows,width=60%,caption=Organisation]
+|===
+|Objects|Permission
+|*purchaseordercustomreferencenumber*|Read PurchaseOrderCustomReferenceNumber object of PurchaseOrderCustomReferenceNumber , Create/Update PurchaseOrderCustomReferenceNumber object of PurchaseOrderCustomReferenceNumber , Delete PurchaseOrderCustomReferenceNumber object of PurchaseOrderCustomReferenceNumber , 
+
+|===
+
+
+
+== OTHER
+
+__API_DOC__
+
+
+== CHANGELOG
+
+
+# CHANGELOG PURCHASEORDERCUSTOMREFERENCENUMBER FOR [DOLIBARR ERP CRM](https://www.dolibarr.org)
+ 1.0
+Initial version
+

@@ -1,0 +1,26 @@
+[19-Jun-2024 20:52:53 America/Chicago] PHP Fatal error:  Uncaught ValueError: XMLReader::XML(): Argument #1 ($source) cannot be empty in /home2/vagainc/public_html/dbvaga19/includes/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Reader/Xlsx.php:206
+Stack trace:
+#0 /home2/vagainc/public_html/dbvaga19/includes/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Reader/Xlsx.php(206): XMLReader->XML('', NULL, 12)
+#1 /home2/vagainc/public_html/dbvaga19/core/modules/import/import_xlsx.modules.php(310): PhpOffice\PhpSpreadsheet\Reader\Xlsx->listWorksheetInfo('/home2/vagainc/...')
+#2 /home2/vagainc/public_html/dbvaga19/imports/import.php(836): ImportXlsx->import_read_record()
+#3 {main}
+  thrown in /home2/vagainc/public_html/dbvaga19/includes/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Reader/Xlsx.php on line 206
+[19-Jun-2024 20:53:06 America/Chicago] PHP Fatal error:  Uncaught ValueError: XMLReader::XML(): Argument #1 ($source) cannot be empty in /home2/vagainc/public_html/dbvaga19/includes/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Reader/Xlsx.php:206
+Stack trace:
+#0 /home2/vagainc/public_html/dbvaga19/includes/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Reader/Xlsx.php(206): XMLReader->XML('', NULL, 12)
+#1 /home2/vagainc/public_html/dbvaga19/core/modules/import/import_xlsx.modules.php(310): PhpOffice\PhpSpreadsheet\Reader\Xlsx->listWorksheetInfo('/home2/vagainc/...')
+#2 /home2/vagainc/public_html/dbvaga19/imports/import.php(836): ImportXlsx->import_read_record()
+#3 {main}
+  thrown in /home2/vagainc/public_html/dbvaga19/includes/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Reader/Xlsx.php on line 206
+[19-Jun-2024 20:53:20 America/Chicago] PHP Fatal error:  Uncaught ValueError: XMLReader::XML(): Argument #1 ($source) cannot be empty in /home2/vagainc/public_html/dbvaga19/includes/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Reader/Xlsx.php:206
+Stack trace:
+#0 /home2/vagainc/public_html/dbvaga19/includes/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Reader/Xlsx.php(206): XMLReader->XML('', NULL, 12)
+#1 /home2/vagainc/public_html/dbvaga19/core/modules/import/import_xlsx.modules.php(310): PhpOffice\PhpSpreadsheet\Reader\Xlsx->listWorksheetInfo('/home2/vagainc/...')
+#2 /home2/vagainc/public_html/dbvaga19/imports/import.php(836): ImportXlsx->import_read_record()
+#3 {main}
+  thrown in /home2/vagainc/public_html/dbvaga19/includes/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Reader/Xlsx.php on line 206
+[20-Jun-2024 10:11:16 America/Chicago] PHP Fatal error:  Uncaught Error: Failed opening required '/home2/vagainc/public_html/dbvaga19/imports/google-authenticator/vendor/autoload.php' (include_path='/home2/vagainc/public_html/htdocs') in /home2/vagainc/public_html/dbvaga19/main.inc.php:807
+Stack trace:
+#0 /home2/vagainc/public_html/dbvaga19/imports/import.php(27): require_once()
+#1 {main}
+  thrown in /home2/vagainc/public_html/dbvaga19/main.inc.php on line 807

@@ -1,0 +1,215 @@
+<?php
+
+dol_syslog(">>> inside actions ");
+
+if (!defined('DOL_DOCUMENT_ROOT')) {
+    define('DOL_DOCUMENT_ROOT', __DIR__ . '/../..');
+}
+
+dol_include_once('/core/class/hookmanager.class.php');
+
+class ActionsProposalUom
+{
+	
+	
+    public function addMoreHooks($parameters, &$object, &$action, $hookmanager)
+    {
+        dol_syslog(">>> proposal uom update -> CUSTOM MODULE ACTION EXECUTED");
+        
+        if (in_array('propalcard', explode(':', $parameters['context']))) {
+            dol_syslog(">>> proposal uom  -> Inside if condition propalcard");
+            
+            if ($action == 'addline' || $action == 'updateline') {
+                dol_syslog(">>> proposal uom update -> Inside addline / updateline");
+                
+                $product = new Product($this->db);
+                $product->fetch($object->fk_product);
+
+                $uom = $product->array_options['options_uom'];
+                if (!empty($uom)) {
+                    dol_syslog(">>> proposal uom update -> Inside not empty uom");
+                    $object->array_options['options_uom'] = $uom;
+                    $object->insertExtraFields();
+                }
+            }
+        }
+        return 0;
+    }
+	
+	/**
+	 * Overriding the doActions function : replacing the parent function with the one below
+	 *
+	 * @param   array()         $parameters     Hook metadatas (context, etc...)
+	 * @param   CommonObject    &$object        The object to process (an invoice if you are in invoice module, a propale in propale's module, etc...)
+	 * @param   string          &$action        Current action (if set). Generally create or edit or null
+	 * @param   HookManager     $hookmanager    Hook manager propagated to allow calling another hook
+	 * @return  int                             < 0 on error, 0 on success, 1 to replace standard code
+	 */
+//	function doActions($parameters, &$object, &$action, $hookmanager)
+//	{
+//		dol_syslog(">>> doActions  -> CUSTOM MODULE ACTION EXECUTED");
+//		$error = 0; // Error counter
+//		$myvalue = 'test'; // A result value
+//
+//		//print_r($parameters);
+//		//echo "><<<< action: " . $action;
+//		//print_r($object);
+//
+//
+//		if (in_array('propalcard', explode(':', $parameters['context']))) {
+//			dol_syslog(">>> proposal uom update -> Inside if condition propalcard");
+//
+//			if ($action == 'addline' || $action == 'updateline') {
+//				dol_syslog(">>> proposal uom update -> Inside addline / updateline");
+//
+//				$product = new Product($this->db);
+//				$result = $product->fetch($object->fk_product);
+//
+//				if ($result > 0) {
+//					dol_syslog(">>> Product fetched successfully");
+//
+//					$uom = $product->array_options['options_uom'];
+//
+//					if (!empty($uom)) {
+//						dol_syslog(">>> proposal uom update -> Inside not empty uom");
+//						$object->array_options['options_uom'] = $uom;
+//						$object->insertExtraFields();
+//					} else {
+//						dol_syslog(">>> proposal uom update -> UOM not found", LOG_WARNING);
+//					}
+//				} else {
+//					dol_syslog("Failed to fetch product with ID: " . $object->fk_product, LOG_ERR);
+//				}
+//			}
+//		}
+//
+//
+//
+//
+//		if (in_array('somecontext', explode(':', $parameters['context'])))
+//		{
+//		  // do something only for the context 'somecontext'
+//		}
+//
+//		if (! $error)
+//		{
+//			$this->results = array('myreturn' => $myvalue);
+//			$this->resprints = 'A text to show';
+//			return 0; // or return 1 to replace standard code
+//		}
+//		else
+//		{
+//			$this->errors[] = 'Error message';
+//			return -1;
+//		}
+//	}
+
+/**
+     * Overloading the doActions function : replacing the parent's function with the one below
+     *
+     * @param   object  $parameters     Hook metadatas (context, etc...)
+     * @param   object  $object         The object to process (a proposal)
+     * @param   string  $action         Current action (if set)
+     * @param   object  $hookmanager    Hook manager propagated to allow calling another hook
+     * @return  void
+     */
+    function runTrigger($action, $object, $user, $langs, $conf)
+    {
+		dol_syslog('>>> actions_proposaluom runTrigger:  '.$action, LOG_DEBUG);
+        if ($action == 'PROPAL_ADD_LINE')
+        {
+            dol_syslog('>>> actions_proposaluom: Line item added to proposal with ID '.$object->id, LOG_DEBUG);
+        }
+    }
+
+
+    /**
+     * Function to handle hooks
+     * @param string $parameters Hook metadatas (context, etc...)
+     * @param object $object     The object to process (in this case, a proposal)
+     * @param string $action     Current action (if set)
+     * @param object $hookmanager Hook manager propagated to allow calling another hook
+     * @return void
+     */
+	function formObjectOptions($parameters, &$object, &$action, $hookmanager)
+{
+    global $langs, $db, $conf;
+
+    // Only inject script on proposal form
+    if (in_array('propalcard', explode(':', $parameters['context'])))
+    {
+        ?>
+        <script type="text/javascript">
+            $(document).ready(function() {
+                // Listen for changes on the product selection dropdown
+                $("select[name='idprod']").change(function() {
+					//alert("here");
+                    var productId = $(this).val();
+                    
+                    if (productId) {
+                        $.ajax({
+                            url: "<?php echo DOL_URL_ROOT; ?>/custom/proposaluom/ajax/get_uom.php",
+                            data: {
+                                product_id: productId
+                            },
+                            method: "GET",
+                            dataType: "json",
+                            success: function(response) {
+                                if (response.success) {
+									//alert(response.uom);
+                                    // Update the UOM dropdown with the fetched value
+									 $("select[name='options_uom']").val(response.uom).trigger('change');               
+                                } else {
+                                    console.log("UOM not found for the selected product.");
+                                }
+                            },
+                            error: function() {
+                                console.log("Error in AJAX request.");
+                            }
+                        });
+                    }
+                });
+            });
+        </script>
+        <?php
+    }
+}
+
+public function addMoreActionsButtons($parameters, &$object, &$action, $hookmanager)
+{
+	
+	//print '<script type="text/javascript">document.addEventListener("DOMContentLoaded", function() {        alert("JavaScript added by the custom module is running.");
+        // Your existing code    });</script>';
+
+    global $conf, $langs;
+
+    if (strpos($parameters['context'], 'propalcard') !== false)
+    {
+ // Fetch the current revision value from the object's extra fields
+        $currentRevision = !empty($object->array_options['options_proposalrevision']) ? $object->array_options['options_proposalrevision'] : 'No revision set';
+
+        print '<script type="text/javascript">
+		    var currentRevision = "' . addslashes($currentRevision) . '"; // Pass PHP variable to JavaScript
+			alert("Proposal Revision is: " + currentRevision);
+            document.addEventListener("DOMContentLoaded", function() {
+               //alert("JavaScript is working.");           
+                var fields = document.querySelectorAll("form input, form textarea, form select");
+                var isModified = false;
+
+                fields.forEach(function(field) {
+                    field.addEventListener("change", function() {
+                        isModified = true;
+                        if (isModified) {
+                            alert("Please make sure to update the \'Revision\' field value before saving.");
+                            isModified = false;
+                        }
+                    });
+                });
+            });
+        </script>';
+    }
+} // addMoreActionsButtons
+
+
+
+} //class

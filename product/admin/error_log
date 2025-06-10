@@ -1,0 +1,10 @@
+[24-Aug-2024 22:44:58 America/Chicago] PHP Fatal error:  Uncaught Error: Failed opening required '/home2/vagainc/public_html/dbvaga19/product/admin/google-authenticator/vendor/autoload.php' (include_path='/home2/vagainc/public_html/htdocs') in /home2/vagainc/public_html/dbvaga19/main.inc.php:807
+Stack trace:
+#0 /home2/vagainc/public_html/dbvaga19/product/admin/product_extrafields.php(29): require()
+#1 {main}
+  thrown in /home2/vagainc/public_html/dbvaga19/main.inc.php on line 807
+[24-Aug-2024 22:45:03 America/Chicago] PHP Fatal error:  Uncaught Error: Failed opening required '/home2/vagainc/public_html/dbvaga19/product/admin/google-authenticator/vendor/autoload.php' (include_path='/home2/vagainc/public_html/htdocs') in /home2/vagainc/public_html/dbvaga19/main.inc.php:807
+Stack trace:
+#0 /home2/vagainc/public_html/dbvaga19/product/admin/product_extrafields.php(29): require()
+#1 {main}
+  thrown in /home2/vagainc/public_html/dbvaga19/main.inc.php on line 807

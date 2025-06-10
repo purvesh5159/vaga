@@ -1,0 +1,15 @@
+[23-Jul-2024 05:11:17 America/Chicago] PHP Fatal error:  Uncaught Error: Failed opening required '/home2/vagainc/public_html/dbvaga19_2/admin/google-authenticator/vendor/autoload.php' (include_path='/home2/vagainc/public_html/htdocs') in /home2/vagainc/public_html/dbvaga19_2/main.inc.php:807
+Stack trace:
+#0 /home2/vagainc/public_html/dbvaga19_2/admin/modules.php(37): require()
+#1 {main}
+  thrown in /home2/vagainc/public_html/dbvaga19_2/main.inc.php on line 807
+[23-Jul-2024 05:11:38 America/Chicago] PHP Fatal error:  Uncaught Error: Failed opening required '/home2/vagainc/public_html/dbvaga19_2/admin/google-authenticator/vendor/autoload.php' (include_path='/home2/vagainc/public_html/htdocs') in /home2/vagainc/public_html/dbvaga19_2/main.inc.php:807
+Stack trace:
+#0 /home2/vagainc/public_html/dbvaga19_2/admin/modules.php(37): require()
+#1 {main}
+  thrown in /home2/vagainc/public_html/dbvaga19_2/main.inc.php on line 807
+[23-Jul-2024 05:12:24 America/Chicago] PHP Fatal error:  Uncaught Error: Failed opening required '/home2/vagainc/public_html/dbvaga19_2/admin/google-authenticator/vendor/autoload.php' (include_path='/home2/vagainc/public_html/htdocs') in /home2/vagainc/public_html/dbvaga19_2/main.inc.php:807
+Stack trace:
+#0 /home2/vagainc/public_html/dbvaga19_2/admin/modules.php(37): require()
+#1 {main}
+  thrown in /home2/vagainc/public_html/dbvaga19_2/main.inc.php on line 807

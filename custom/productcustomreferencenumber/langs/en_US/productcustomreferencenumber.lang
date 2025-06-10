@@ -1,0 +1,55 @@
+# Copyright (C) 2024 SuperAdmin
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#
+# Generic
+#
+
+# Module label 'ModuleProductCustomReferenceNumberName'
+ModuleProductCustomReferenceNumberName = ProductCustomReferenceNumber
+# Module description 'ModuleProductCustomReferenceNumberDesc'
+ModuleProductCustomReferenceNumberDesc = ProductCustomReferenceNumber description
+
+#
+# Admin page
+#
+ProductCustomReferenceNumberSetup = ProductCustomReferenceNumber setup
+Settings = Settings
+ProductCustomReferenceNumberSetupPage = ProductCustomReferenceNumber setup page
+PRODUCTCUSTOMREFERENCENUMBER_MYPARAM1 = My param 1
+PRODUCTCUSTOMREFERENCENUMBER_MYPARAM1Tooltip = My param 1 tooltip
+PRODUCTCUSTOMREFERENCENUMBER_MYPARAM2=My param 2
+PRODUCTCUSTOMREFERENCENUMBER_MYPARAM2Tooltip=My param 2 tooltip
+
+
+#
+# About page
+#
+About = About
+ProductCustomReferenceNumberAbout = About ProductCustomReferenceNumber
+ProductCustomReferenceNumberAboutPage = ProductCustomReferenceNumber about page
+
+#
+# Sample page
+#
+ProductCustomReferenceNumberArea = Home ProductCustomReferenceNumber
+MyPageName = My page name
+CustomProductType= Custom Product Type
+
+#
+# Sample widget
+#
+MyWidget = My widget
+MyWidgetDescription = My widget description
