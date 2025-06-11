@@ -1407,25 +1407,60 @@ $pagination = $pdf->PageNo().' / '.$pdf->getAliasNbPages();
  *	@param	string		$default_font_size	Font size
  *	@return	float                           The Y PDF position
  */
+// function pdf_writeLinkedObjects(&$pdf, $object, $outputlangs, $posx, $posy, $w, $h, $align, $default_font_size)
+// {
+// 	$linkedobjects = pdf_getLinkedObjects($object, $outputlangs);
+// 	if (!empty($linkedobjects)) {
+// 		foreach ($linkedobjects as $linkedobject) {
+// 			$reftoshow = $linkedobject["ref_title"].' : '.$linkedobject["ref_value"];
+// 			if (!empty($linkedobject["date_value"])) {
+// 				$reftoshow .= ' / '.$linkedobject["date_value"];
+// 			}
+
+// 			$posy += 3;
+// 			$pdf->SetXY($posx, $posy);
+// 			$pdf->SetFont('', '', $default_font_size - 2);
+// 			$pdf->MultiCell($w, $h, $reftoshow, '', $align);
+// 		}
+// 	}
+
+// 	return $pdf->getY();
+// }
+ 
+
+ //added purvesh of invoice overlapping issue
 function pdf_writeLinkedObjects(&$pdf, $object, $outputlangs, $posx, $posy, $w, $h, $align, $default_font_size)
 {
-	$linkedobjects = pdf_getLinkedObjects($object, $outputlangs);
-	if (!empty($linkedobjects)) {
-		foreach ($linkedobjects as $linkedobject) {
-			$reftoshow = $linkedobject["ref_title"].' : '.$linkedobject["ref_value"];
-			if (!empty($linkedobject["date_value"])) {
-				$reftoshow .= ' / '.$linkedobject["date_value"];
-			}
+    $linkedobjects = pdf_getLinkedObjects($object, $outputlangs);
+    if (!empty($linkedobjects)) {
+        foreach ($linkedobjects as $linkedobject) {
+            $reftoshow = $linkedobject["ref_title"] . ' : ' . $linkedobject["ref_value"];
+            if (!empty($linkedobject["date_value"])) {
+                $reftoshow .= ' / ' . $linkedobject["date_value"];
+            }
 
-			$posy += 3;
-			$pdf->SetXY($posx, $posy);
-			$pdf->SetFont('', '', $default_font_size - 2);
-			$pdf->MultiCell($w, $h, $reftoshow, '', $align);
-		}
-	}
+            // Set position and font
+            $pdf->SetXY($posx, $posy);
+            $pdf->SetFont('', '', $default_font_size - 2);
 
-	return $pdf->getY();
+            // Capture initial Y before writing
+            $initialY = $pdf->GetY();
+
+            // Write text with wrapping
+            $pdf->MultiCell($w, $h, $reftoshow, 0, $align);
+
+            // Get new Y after writing
+            $newY = $pdf->GetY();
+
+            // Update posy for next object, adding spacing if needed
+            $posy = $newY; // 1 is extra space between lines
+        }
+    }
+
+    // Return final Y for outside use
+    return $posy;
 }
+
 
 /**
  *	Output line description into PDF

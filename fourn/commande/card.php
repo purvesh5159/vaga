@@ -2945,7 +2945,7 @@ if ($action == 'create') {
 		print '<div style="text-align: right;">';
 		print '<div class="inline-block" style="vertical-align: top; margin-right: 10px;">';
 		print '<select name="linked_comm_fourni_id" class="flat minwidth300 maxwidthonsmartphone">';
-		print '<option value="">Select Proposal to Link...</option>';
+		print '<option value="">Select Purchase Order to Link...</option>';
 
 		foreach ($propal_refs as $propal) {
 			$selected = '';
@@ -3003,13 +3003,13 @@ if ($action == 'create') {
 						print '<input type="hidden" name="token" value="'.newToken().'">';
 						print '<input type="hidden" name="action" value="unlink_propal">';
 						print '<input type="hidden" name="link_id" value="'.$obj_linked->rowid.'">';
-						print '<input class="button small" type="submit" value="Unlink" onclick="return confirm(\'Are you sure you want to unlink this proposal?\')">';
+						print '<input class="button small" type="submit" value="Unlink" onclick="return confirm(\'Are you sure you want to unlink this Purchase Order?\')">';
 						print '</form>';
 						print '</td>';
 						print '</tr>';
 				}
 			} else {
-				print '<tr><td colspan="6" class="opacitymedium">No linked proposals</td></tr>';
+				print '<tr><td colspan="6" class="opacitymedium">No linked Purchase Orders</td></tr>';
 			}
 			$db->free($resql_linked);
 		}

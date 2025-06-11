@@ -99,6 +99,9 @@ class Commande extends CommonOrder
 	 */
 	protected $table_ref_field = 'ref';
 
+	/* sales ourder revision purvesh*/
+	public $revision = 0;
+
 	/**
 	 * @var int Thirdparty ID
 	 */
@@ -383,6 +386,8 @@ class Commande extends CommonOrder
 	 */
 	const STATUS_CLOSED = 3;
 
+
+	const STATUS_INACTIVE = 4;
 
 	/**
 	 *	Constructor
@@ -1846,7 +1851,7 @@ class Commande extends CommonOrder
 			return -1;
 		}
 
-		$sql = 'SELECT c.rowid, c.entity, c.date_creation, c.ref, c.fk_soc, c.fk_user_author, c.fk_user_valid, c.fk_user_modif, c.fk_statut';
+		$sql = 'SELECT c.rowid, c.entity, c.date_creation, c.ref, c.revision, c.fk_soc, c.fk_user_author, c.fk_user_valid, c.fk_user_modif, c.fk_statut';
 		$sql .= ', c.amount_ht, c.total_ht, c.total_ttc, c.total_tva, c.localtax1 as total_localtax1, c.localtax2 as total_localtax2, c.fk_cond_reglement, c.deposit_percent, c.fk_mode_reglement, c.fk_availability, c.fk_input_reason';
 		$sql .= ', c.fk_account';
 		$sql .= ', c.date_commande, c.date_valid, c.tms';
@@ -1892,6 +1897,7 @@ class Commande extends CommonOrder
 				$this->entity = $obj->entity;
 
 				$this->ref = $obj->ref;
+				$this->revision = $obj->revision;
 				$this->ref_client = $obj->ref_client;
 				$this->ref_customer = $obj->ref_client;
 				$this->ref_ext = $obj->ref_ext;
@@ -3319,6 +3325,9 @@ class Commande extends CommonOrder
 		if (isset($this->ref)) {
 			$this->ref = trim($this->ref);
 		}
+		if (isset($this->revision)) {
+			$this->revision = trim($this->revision);
+		}
 		if (isset($this->ref_client)) {
 			$this->ref_client = trim($this->ref_client);
 		}
@@ -3346,6 +3355,7 @@ class Commande extends CommonOrder
 		$sql = "UPDATE ".MAIN_DB_PREFIX."commande SET";
 
 		$sql .= " ref=".(isset($this->ref) ? "'".$this->db->escape($this->ref)."'" : "null").",";
+		$sql .= " revision=".(isset($this->revision) ? "'".$this->db->escape($this->revision)."'" : "null").",";
 		$sql .= " ref_client=".(isset($this->ref_client) ? "'".$this->db->escape($this->ref_client)."'" : "null").",";
 		$sql .= " ref_ext=".(isset($this->ref_ext) ? "'".$this->db->escape($this->ref_ext)."'" : "null").",";
 		$sql .= " fk_soc=".(isset($this->socid) ? $this->socid : "null").",";
@@ -3709,6 +3719,10 @@ class Commande extends CommonOrder
 			$labelStatus = $langs->transnoentitiesnoconv('StatusOrderDelivered').$billedtext;
 			$labelStatusShort = $langs->transnoentitiesnoconv('StatusOrderDeliveredShort').$billedtext;
 			$statusType = 'status6';
+		} elseif ($status == self::STATUS_INACTIVE) {
+			$labelStatus = $langs->transnoentitiesnoconv('StatusOrderInActive').$billedtext;
+			$labelStatusShort = $langs->transnoentitiesnoconv('StatusOrderInActiveShort').$billedtext;
+			$statusType = 'status7';
 		} else {
 			$labelStatus = $langs->transnoentitiesnoconv('Unknown');
 			$labelStatusShort = '';

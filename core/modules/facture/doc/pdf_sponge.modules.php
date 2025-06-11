@@ -2154,20 +2154,39 @@ class pdf_sponge extends ModelePDFFactures
 		 }
 		 $pdf->MultiCell($w, 4, $textref, '', 'R');*/
 
-		$posy += 3;
+		$posy += 4;
 		$pdf->SetFont('', '', $default_font_size - 2);
 
-		if ($object->ref_customer) {
+		/*if ($object->ref_customer) {
 			$posy += 4;
 			$pdf->SetXY($posx, $posy);
 			$pdf->SetTextColor(0, 0, 60);
 			$pdf->MultiCell($w, 3, $outputlangs->transnoentities("RefCustomer")." : ".dol_trunc($outputlangs->convToOutputCharset($object->ref_customer), 65), '', 'R');
+		}*/
+        //added purvesh of invoice overlapping issue
+		if ($object->ref_customer) {
+			$ref_customer = $outputlangs->convToOutputCharset($object->ref_customer);
+			$ref_customer_trunc = dol_trunc($ref_customer, 130); // allow more chars before truncation
+			$posy += 2;
+			$pdf->SetXY($posx, $posy);
+			$pdf->SetTextColor(0, 0, 60);
+
+			if (dol_strlen($ref_customer) >= 50) {
+				// If ref_customer is long, allow multiple lines and adjust height
+				$pdf->SetFont('', '', 8);
+				$pdf->MultiCell($w, 6, $outputlangs->transnoentities("RefCustomer") . " :\n" . $ref_customer_trunc, '', 'R');
+				$posy += 4; // Extra vertical space to account for line wrap
+			} else {
+				// Standard short version
+				$pdf->MultiCell($w, 3, $outputlangs->transnoentities("RefCustomer") . " : " . dol_trunc($ref_customer, 50), '', 'R');
+			}
 		}
+
 
 		if (getDolGlobalString('PDF_SHOW_PROJECT_TITLE')) {
 			$object->fetch_projet();
 			if (!empty($object->project->ref)) {
-				$posy += 3;
+				$posy += 4;
 				$pdf->SetXY($posx, $posy);
 				$pdf->SetTextColor(0, 0, 60);
 				$pdf->MultiCell($w, 3, $outputlangs->transnoentities("Project")." : ".(empty($object->project->title) ? '' : $object->project->title), '', 'R');
@@ -2178,7 +2197,7 @@ class pdf_sponge extends ModelePDFFactures
 			$object->fetch_projet();
 			if (!empty($object->project->ref)) {
 				$outputlangs->load("projects");
-				$posy += 3;
+				$posy += 4;
 				$pdf->SetXY($posx, $posy);
 				$pdf->SetTextColor(0, 0, 60);
 				$pdf->MultiCell($w, 3, $outputlangs->transnoentities("RefProject")." : ".(empty($object->project->ref) ? '' : $object->project->ref), '', 'R');
@@ -2190,7 +2209,7 @@ class pdf_sponge extends ModelePDFFactures
 			$objectreplacing = new Facture($this->db);
 			$objectreplacing->fetch($objectidnext);
 
-			$posy += 3;
+			$posy += 4;
 			$pdf->SetXY($posx, $posy);
 			$pdf->SetTextColor(0, 0, 60);
 			$pdf->MultiCell($w, 3, $outputlangs->transnoentities("ReplacementByInvoice").' : '.$outputlangs->convToOutputCharset($objectreplacing->ref), '', 'R');
@@ -2232,7 +2251,7 @@ class pdf_sponge extends ModelePDFFactures
 		}
 
 		if ($object->type != 2) {
-			$posy += 3;
+			$posy += 4;
 			$pdf->SetXY($posx, $posy);
 			$pdf->SetTextColor(0, 0, 60);
 			$title = $outputlangs->transnoentities("DateDue");
@@ -2243,7 +2262,7 @@ class pdf_sponge extends ModelePDFFactures
 		}
 
 		if (!getDolGlobalString('MAIN_PDF_HIDE_CUSTOMER_CODE') && $object->thirdparty->code_client) {
-			$posy += 3;
+			$posy += 4;
 			$pdf->SetXY($posx, $posy);
 			$pdf->SetTextColor(0, 0, 60);
 			$pdf->MultiCell($w, 3, $outputlangs->transnoentities("CustomerCode")." : ".$outputlangs->transnoentities($object->thirdparty->code_client), '', 'R');
@@ -2262,7 +2281,7 @@ class pdf_sponge extends ModelePDFFactures
 			}
 		}
 
-		$posy += 1;
+		$posy += 4;
 
 		$top_shift = 0;
 		$shipp_shift = 0;
@@ -2272,7 +2291,7 @@ class pdf_sponge extends ModelePDFFactures
 		if ($current_y < $pdf->getY()) {
 			$top_shift = $pdf->getY() - $current_y;
 		}
-
+        
 		if ($showaddress) {
 			// Sender properties
 			$carac_emetteur = '';

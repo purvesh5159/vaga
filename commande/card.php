@@ -196,6 +196,36 @@ if (empty($reshook)) {
 
 				$result = $object->createFromClone($user, $socid);
 				if ($result > 0) {
+
+				$neworder = new Commande($db);
+				$neworder->fetch($result);
+                $new_ref = $orig->ref;
+				$base_ref = preg_replace('/-R\d+$/', '', $new_ref);
+            
+				$sql = "SELECT MAX(revision) as maxrev FROM ".MAIN_DB_PREFIX."commande
+						WHERE ref LIKE '".$db->escape($base_ref)."%'";
+
+				$resql = $db->query($sql);
+				$revision = 1;
+				if ($resql && $obj = $db->fetch_object($resql)) {
+					$revision = (int) $obj->maxrev + 1;
+				}
+
+				$newref = $base_ref . '-R' . $revision;
+			
+				$neworder->ref = $newref;
+				$neworder->revision = $revision;
+				$object->statut = Commande::STATUS_VALIDATED;
+				$object->status = Commande::STATUS_VALIDATED;
+				$neworder->update($user);
+
+				// Mark older revisions obsolete
+				$sql2 = "UPDATE ".MAIN_DB_PREFIX."commande
+						SET fk_statut = 4
+						WHERE ref LIKE '".$db->escape($base_ref)."%' 
+						AND rowid != ".((int) $object->id);
+				$db->query($sql2);
+
 					header("Location: ".$_SERVER['PHP_SELF'].'?id='.$result);
 					exit;
 				} else {
@@ -1491,6 +1521,99 @@ if (empty($reshook)) {
 				setEventMessages($object->error, $object->errors, 'errors');
 			}
 		}
+	}
+    
+	// update status and link and unlink purvesh
+	elseif (GETPOST('action') == 'update_propal_link' && $user->rights->commande->creer) {
+			$linked_commande_id = GETPOST('linked_commande_id', 'int');
+			$link_reason = GETPOST('link_reason', 'alpha');
+			
+			if ($linked_commande_id) {
+				// Check if link already exists
+				$sql_check = "SELECT rowid FROM ".MAIN_DB_PREFIX."commande_links";
+				$sql_check .= " WHERE fk_commande_source  = ".(int)$object->id;
+				$sql_check .= " AND fk_commande_linked  = ".(int)$linked_commande_id;
+				
+				$resql_check = $db->query($sql_check);
+				
+				if ($db->num_rows($resql_check) == 0) {
+					// Insert new link
+					$sql_insert = "INSERT INTO ".MAIN_DB_PREFIX."commande_links";
+					$sql_insert .= " (fk_commande_source, fk_commande_linked , reason, date_creation, fk_user_creat)";
+					$sql_insert .= " VALUES (".(int)$object->id.", ".(int)$linked_commande_id.", '".$db->escape($link_reason)."', '".$db->idate(dol_now())."', ".(int)$user->id.")";
+					$result = $db->query($sql_insert);
+
+					if ($result) {
+						setEventMessages('Sales Order linked successfully', null, 'mesgs');
+						header("Location: ".$_SERVER["PHP_SELF"]."?id=".$object->id);
+					   exit;
+					} else {
+						setEventMessages('Error linking Sales Order: '.$db->lasterror(), null, 'errors');
+					}
+				} else {
+					setEventMessages('This Sales Order is already linked', null, 'warnings');
+				}
+			
+			} else {
+				setEventMessages('Please select a Sales Order and provide a reason', null, 'errors');
+			}
+
+			// header('Location: '.$_SERVER["PHP_SELF"].'?id='.$object->id);
+			// exit;
+	}
+
+	elseif (GETPOST('action') == 'unlink_propal' && $user->rights->commande->creer) {
+			$link_id = GETPOST('link_id', 'int');
+			
+			if ($link_id) {
+				$sql_delete = "DELETE FROM ".MAIN_DB_PREFIX."commande_links WHERE rowid = ".(int)$link_id;
+				
+				if ($db->query($sql_delete)) {
+					setEventMessages('Sales Order unlinked successfully', null, 'mesgs');
+					header("Location: ".$_SERVER["PHP_SELF"]."?id=".$object->id);
+					   exit;
+				} else {
+					setEventMessages('Error unlinking Sales Order', null, 'errors');
+				}
+				
+				// header('Location: '.$_SERVER["PHP_SELF"].'?id='.$object->id);
+				// exit;
+			}
+	}
+
+	elseif ($action == 'setstatus' && $user->rights->commande->creer)
+	{
+		$object->fetch($id);
+		$newstatus = GETPOST('newstatus', 'int');
+		$reason = GETPOST('options_reasonforstatuschange', 'alpha');
+		
+		if ($newstatus !== '') {
+			
+			$object->fetch($id); // Always fetch object first
+            $object->statut = $newstatus;
+			$object->array_options['options_reasonforstatuschange'] = $reason;
+
+			 if ($newstatus == 1) {
+                $base_ref = preg_replace('/-R\d+$/', '', $object->ref);
+				$sql = "UPDATE ".MAIN_DB_PREFIX."commande
+						SET fk_statut = 4
+						WHERE ref LIKE '".$db->escape($base_ref)."%' 
+						AND rowid != ".$object->id;
+				$db->query($sql);
+            } 
+
+			$object->update($user);
+			$result = $object->update($user); // Capture result of update
+
+			
+			if ($result > 0) {
+				setEventMessages('Status updated successfully', null, 'mesgs');
+				header("Location: ".$_SERVER["PHP_SELF"]."?id=".$object->id);
+			   exit;	
+			} else {
+				setEventMessages('Error updating status', null, 'errors');
+			}
+		} 
 	}
 
 	if ($action == 'update_extras') {
@@ -3078,6 +3201,171 @@ if ($action == 'create' && $usercancreate) {
 			}
 			print '</div>';
 		}
+
+		//salesorder update status and link salesorder purvesh
+
+		// Fetch proposal references from vg_propal where fk_soc matches current company pruvesh
+		$base_ref = preg_replace('/-R\d+$/', '', $object->ref);
+		$current_id = (int) $object->id;
+		$sql = "SELECT p.rowid, p.ref, p.ref_client, p.tms";
+		$sql .= " FROM ".MAIN_DB_PREFIX."commande p";
+		$sql .= " WHERE p.fk_soc = ".(int)$object->socid;
+		$sql .= " AND p.entity IN (".getEntity('propal').")";
+		$sql .= " AND p.ref LIKE '".$db->escape($base_ref)."%'";       
+		$sql .= " AND p.rowid != ".$current_id;
+		$sql .= " ORDER BY p.tms DESC, p.ref DESC";
+
+		$resql = $db->query($sql);
+		$propal_refs = array();
+
+		if ($resql) {
+			$num = $db->num_rows($resql);
+			while ($obj = $db->fetch_object($resql)) {
+				$propal_refs[] = array(
+					'rowid' => $obj->rowid,
+					'ref' => $obj->ref,
+					'ref_client' => $obj->ref_client,
+					'tms' => $obj->tms
+				);
+			}
+			$db->free($resql);
+		}
+
+	// Status change form with reason dropdown pruvesh
+		
+		print '<div class="fichecenter">';
+		print '<div class="div-table-responsive-no-min">';
+		print '<table class="noborder centpercent">';
+		print '<tr class="liste_titre">';
+		print '<th colspan="5">Update Sales Order Status</th>';
+		print '</tr>';
+
+		print '<tr>';
+	//	print '<td class="titlefield">Link to Proposal</td>';
+		print '<td colspan="5">';
+		print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'">';
+		print '<input type="hidden" name="token" value="'.newToken().'">';
+		print '<input type="hidden" name="action" value="setstatus">';
+		print '<div style="text-align: right;">';
+		print '<div class="inline-block" style="vertical-align: top; margin-right: 10px;">';
+		print '<select name="newstatus" class="flat minwidth300 maxwidthonsmartphone">';
+		print '<option value="">Select Status...</option>';
+		print '<option value="0"'.($object->statut == 0 ? ' selected' : '').'>Draft</option>';
+		print '<option value="1"'.($object->statut == 1 ? ' selected' : '').'>Validated</option>';
+		print '<option value="2"'.($object->statut == 2 ? ' selected' : '').'>Approved</option>';
+		print '<option value="3"'.($object->statut == 3 ? ' selected' : '').'>Closed</option>';
+		print '<option value="4"'.($object->statut == 4 ? ' selected' : '').'>In Active</option>';
+		print '<option value="5"'.($object->statut == -3 ? ' selected' : '').'>Stock not enough for order</option>';
+		print '<option value="6"'.($object->statut == -1 ? ' selected' : '').'>Cancelled</option>';
+		print '</select>';
+		print '</div>';
+		print '<div class="inline-block" style="vertical-align: top; margin-right: 10px;">';
+		print '<textarea name="options_reasonforstatuschange" rows="2" cols="30" placeholder="Reason for status" class="flat" style="resize: vertical;"></textarea>';
+		print '</div>';
+		print '<div class="inline-block" style="vertical-align: top;">';
+		print '<input class="button small" type="submit" value="Update Status">';
+		print '</div>';
+		print '</div>';
+		print '</form>';
+		print '</td>';
+		print '</tr>';
+		print '</table>';
+		print '</div>';
+		print '</div>';
+
+		// Show linked proposals if any
+		print '<br>';
+		print '<div class="fichecenter">';
+		print '<div class="div-table-responsive-no-min">';
+		print '<table class="noborder centpercent">';
+		print '<tr class="liste_titre">';
+		print '<th colspan="5">Linked Sales Orders</th>';
+		print '</tr>';
+
+		print '<tr>';
+	//	print '<td class="titlefield">Link to Proposal</td>';
+		print '<td colspan="5">';
+		print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'">';
+		print '<input type="hidden" name="token" value="'.newToken().'">';
+		print '<input type="hidden" name="action" value="update_propal_link">';
+		print '<div style="text-align: right;">';
+		print '<div class="inline-block" style="vertical-align: top; margin-right: 10px;">';
+		print '<select name="linked_commande_id" class="flat minwidth300 maxwidthonsmartphone">';
+		print '<option value="">Select Sales Order to Link...</option>';
+
+		foreach ($propal_refs as $propal) {
+			$selected = '';
+			// Check if this proposal is already linked (you might have a field for this)
+			if ($object->fk_commande_linked == $propal['rowid']) $selected = ' selected';
+			
+			$option_text = $propal['ref'];
+			if ($propal['ref_client']) $option_text .= ' ('.$propal['ref_client'].')';
+			$option_text .= ' - '.dol_print_date($db->jdate($propal['tms']), 'day');
+			
+			print '<option value="'.$propal['rowid'].'"'.$selected.'>'.dol_escape_htmltag($option_text).'</option>';
+		}
+
+		print '</select>';
+		print '</div>';
+		print '<div class="inline-block" style="vertical-align: top; margin-right: 10px;">';
+		print '<textarea name="link_reason" rows="2" cols="30" placeholder="Reason for linking..." class="flat" style="resize: vertical;"></textarea>';
+		print '</div>';
+		print '<div class="inline-block" style="vertical-align: top;">';
+		print '<input class="button small" type="submit" value="Link Sales Order">';
+		print '</div>';
+		print '</div>';
+		print '</form>';
+		print '</td>';
+		print '</tr>';
+
+		print '<tr class="liste_titre">';
+		print '<th class="left">Ref</th>';
+		print '<th class="left">Client Ref</th>';
+		print '<th class="left">Date</th>';
+		print '<th class="left">Reason</th>';
+		print '<th class="center">Actions</th>';
+		print '</tr>';
+
+		// Fetch linked proposals (assuming you have a linking table)
+		$sql_linked = "SELECT pl.*, p.ref, p.ref_client, p.tms";
+		$sql_linked .= " FROM ".MAIN_DB_PREFIX."commande_links pl";
+		$sql_linked .= " LEFT JOIN ".MAIN_DB_PREFIX."commande p ON p.rowid = pl.fk_commande_linked ";
+		$sql_linked .= " WHERE pl.fk_commande_source  = ".(int)$object->id;
+		$sql_linked .= " ORDER BY pl.date_creation DESC";
+
+		$resql_linked = $db->query($sql_linked);
+		if ($resql_linked) {
+			$num_linked = $db->num_rows($resql_linked);
+			if ($num_linked > 0) {
+				while ($obj_linked = $db->fetch_object($resql_linked)) {
+				
+						print '<tr class="oddeven">';
+						print '<td class="left"><a href="card.php?id='.$obj_linked->fk_commande_linked.'">'.$obj_linked->ref.'</a></td>';
+						print '<td class="left">'.($obj_linked->ref_client ? $obj_linked->ref_supplier : '').'</td>';
+						print '<td class="left">'.dol_print_date($db->jdate($obj_linked->tms), 'day').'</td>';
+						print '<td class="left">'.dol_escape_htmltag($obj_linked->reason).'</td>';
+						print '<td class="center">';
+						print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'" style="display:inline;">';
+						print '<input type="hidden" name="token" value="'.newToken().'">';
+						print '<input type="hidden" name="action" value="unlink_propal">';
+						print '<input type="hidden" name="link_id" value="'.$obj_linked->rowid.'">';
+						print '<input class="button small" type="submit" value="Unlink" onclick="return confirm(\'Are you sure you want to unlink this Sales Order?\')">';
+						print '</form>';
+						print '</td>';
+						print '</tr>';
+				}
+			} else {
+				print '<tr><td colspan="6" class="opacitymedium">No linked Sales Orders</td></tr>';
+			}
+			$db->free($resql_linked);
+		}
+
+				print '</table>';
+				print '</div>';
+				print '</div>';
+		        print '</div>';
+
+//end
 
 		// Select mail models is same action as presend
 		if (GETPOST('modelselected')) {
