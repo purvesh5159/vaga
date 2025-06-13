@@ -84,6 +84,10 @@ class ProductFournisseur extends Product
 	public $fourn_remise_percent; // discount for quantity (percent)
 	public $fourn_remise; // discount for quantity (amount)
 
+	public $freight_charge;
+
+	public $total;
+
 	public $fourn_charges;	// when getDolGlobalString('PRODUCT_CHARGES') is set
 
 	public $product_fourn_id; // product-supplier id
@@ -273,7 +277,7 @@ class ProductFournisseur extends Product
 	 *    @param  	array		$options		     	       	Extrafields of product fourn price
 	 *    @return	int											Return integer <0 if KO, >=0 if OK
 	 */
-	public function update_buyprice($qty, $buyprice, $user, $price_base_type, $fourn, $availability, $ref_fourn, $tva_tx, $charges = 0, $remise_percent = 0, $remise = 0, $newnpr = 0, $delivery_time_days = 0, $supplier_reputation = '', $localtaxes_array = array(), $newdefaultvatcode = '', $multicurrency_buyprice = 0, $multicurrency_price_base_type = 'HT', $multicurrency_tx = 1, $multicurrency_code = '', $desc_fourn = '', $barcode = '', $fk_barcode_type = '', $options = array())
+	public function update_buyprice($qty, $buyprice, $user, $price_base_type, $fourn, $availability, $ref_fourn, $tva_tx, $charges = 0, $remise_percent = 0, $freight_charge = 0, $total = 0, $remise = 0, $newnpr = 0, $delivery_time_days = 0, $supplier_reputation = '', $localtaxes_array = array(), $newdefaultvatcode = '', $multicurrency_buyprice = 0, $multicurrency_price_base_type = 'HT', $multicurrency_tx = 1, $multicurrency_code = '', $desc_fourn = '', $barcode = '', $fk_barcode_type = '', $options = array())
 	{
 		// phpcs:enable
 		global $conf, $langs;
@@ -286,6 +290,8 @@ class ProductFournisseur extends Product
 		if (empty($buyprice)) {
 			$buyprice = 0;
 		}
+		if (empty($freight_charge)) $freight_charge = 0;
+		if (empty($total)) $total = 0;
 		if (empty($charges)) {
 			$charges = 0;
 		}
@@ -391,6 +397,8 @@ class ProductFournisseur extends Product
 			$sql .= " ref_fourn = '".$this->db->escape($ref_fourn)."',";
 			$sql .= " desc_fourn = '".$this->db->escape($desc_fourn)."',";
 			$sql .= " price = ".((float) $buyprice).",";
+			$sql .= " freight_charge = ".((float) $freight_charge).",";
+			$sql .= " total = ".((float) $total).",";
 			$sql .= " quantity = ".((float) $qty).",";
 			$sql .= " remise_percent = ".((float) $remise_percent).",";
 			$sql .= " remise = ".((float) $remise).",";
@@ -478,7 +486,7 @@ class ProductFournisseur extends Product
 				// Add price for this quantity to supplier
 				$sql = "INSERT INTO ".MAIN_DB_PREFIX."product_fournisseur_price(";
 				$sql .= " multicurrency_price, multicurrency_unitprice, multicurrency_tx, fk_multicurrency, multicurrency_code,";
-				$sql .= "datec, fk_product, fk_soc, ref_fourn, desc_fourn, fk_user, price, quantity, remise_percent, remise, unitprice, tva_tx, charges, fk_availability, default_vat_code, info_bits, entity, delivery_time_days, supplier_reputation, barcode, fk_barcode_type";
+				$sql .= "datec, fk_product, fk_soc, ref_fourn, desc_fourn, fk_user, price, freight_charge, total, quantity, remise_percent, remise, unitprice, tva_tx, charges, fk_availability, default_vat_code, info_bits, entity, delivery_time_days, supplier_reputation, barcode, fk_barcode_type";
 				if (getDolGlobalString('PRODUCT_USE_SUPPLIER_PACKAGING')) {
 					$sql .= ", packaging";
 				}
@@ -495,6 +503,8 @@ class ProductFournisseur extends Product
 				$sql .= " '".$this->db->escape($desc_fourn)."',";
 				$sql .= " ".((int) $user->id).",";
 				$sql .= " ".price2num($buyprice).",";
+				$sql .= ", ".((float) $freight_charge);
+				$sql .= ", ".((float) $total);
 				$sql .= " ".((float) $qty).",";
 				$sql .= " ".((float) $remise_percent).",";
 				$sql .= " ".((float) $remise).",";
@@ -592,7 +602,7 @@ class ProductFournisseur extends Product
 		// phpcs:enable
 		global $conf;
 
-		$sql = "SELECT pfp.rowid, pfp.price, pfp.quantity, pfp.unitprice, pfp.remise_percent, pfp.remise, pfp.tva_tx, pfp.default_vat_code, pfp.info_bits as fourn_tva_npr, pfp.fk_availability,";
+		$sql = "SELECT pfp.rowid, pfp.price, pfp.quantity, pfp.unitprice, pfp.remise_percent, pfp.freight_charge, pfp.total, pfp.remise, pfp.tva_tx, pfp.default_vat_code, pfp.info_bits as fourn_tva_npr, pfp.fk_availability,";
 		$sql .= " pfp.fk_soc, pfp.ref_fourn, pfp.desc_fourn, pfp.fk_product, pfp.charges, pfp.fk_supplier_price_expression, pfp.delivery_time_days,";
 		$sql .= " pfp.supplier_reputation, pfp.fk_user, pfp.datec,";
 		$sql .= " pfp.multicurrency_price, pfp.multicurrency_unitprice, pfp.multicurrency_tx, pfp.fk_multicurrency, pfp.multicurrency_code,";
@@ -619,10 +629,12 @@ class ProductFournisseur extends Product
 				$this->fourn_ref				= $obj->ref_fourn; // deprecated
 				$this->ref_supplier             = $obj->ref_fourn;
 				$this->desc_supplier            = $obj->desc_fourn;
-				$this->fourn_price = $obj->price;
+				$this->fourn_price              = $obj->price;
 				$this->fourn_charges            = $obj->charges; // when getDolGlobalString('PRODUCT_CHARGES') is set
 				$this->fourn_qty                = $obj->quantity;
 				$this->fourn_remise_percent     = $obj->remise_percent;
+				$this->freight_charge           = $obj->freight_charge;
+				$this->total                    = $obj->total;
 				$this->fourn_remise             = $obj->remise;
 				$this->fourn_unitprice          = $obj->unitprice;
 				$this->fourn_tva_tx				= $obj->tva_tx;
@@ -694,7 +706,7 @@ class ProductFournisseur extends Product
 
 		$sql = "SELECT s.nom as supplier_name, s.rowid as fourn_id, p.ref as product_ref, p.tosell as status, p.tobuy as status_buy, ";
 		$sql .= " pfp.rowid as product_fourn_pri_id, pfp.entity, pfp.ref_fourn, pfp.desc_fourn, pfp.fk_product as product_fourn_id, pfp.fk_supplier_price_expression,";
-		$sql .= " pfp.price, pfp.quantity, pfp.unitprice, pfp.remise_percent, pfp.remise, pfp.tva_tx, pfp.fk_availability, pfp.charges, pfp.info_bits, pfp.delivery_time_days, pfp.supplier_reputation,";
+		$sql .= " pfp.price, pfp.quantity, pfp.unitprice, pfp.remise_percent, pfp.freight_charge, pfp.total, pfp.remise, pfp.tva_tx, pfp.fk_availability, pfp.charges, pfp.info_bits, pfp.delivery_time_days, pfp.supplier_reputation,";
 		$sql .= " pfp.multicurrency_price, pfp.multicurrency_unitprice, pfp.multicurrency_tx, pfp.fk_multicurrency, pfp.multicurrency_code, pfp.datec, pfp.tms,";
 		$sql .= " pfp.barcode, pfp.fk_barcode_type, pfp.packaging, pfp.status as pfstatus";
 		$sql .= " FROM ".MAIN_DB_PREFIX."product_fournisseur_price as pfp, ".MAIN_DB_PREFIX."product as p, ".MAIN_DB_PREFIX."societe as s";
@@ -731,6 +743,8 @@ class ProductFournisseur extends Product
 				$prodfourn->fourn_price				= $record["price"];
 				$prodfourn->fourn_qty = $record["quantity"];
 				$prodfourn->fourn_remise_percent = $record["remise_percent"];
+				$prodfourn->freight_charge = $record["freight_charge"];
+				$prodfourn->total = $record["total"];
 				$prodfourn->fourn_remise = $record["remise"];
 				$prodfourn->fourn_unitprice = $record["unitprice"];
 				$prodfourn->fourn_charges = $record["charges"]; // when getDolGlobalString('PRODUCT_CHARGES') is set
@@ -815,6 +829,8 @@ class ProductFournisseur extends Product
 		$this->fourn_price            = '';
 		$this->fourn_qty              = '';
 		$this->fourn_remise_percent   = '';
+		$this->freight_charge         = '';
+		$this->total                  = '';
 		$this->fourn_remise           = '';
 		$this->fourn_unitprice        = '';
 		$this->fourn_id               = '';
@@ -831,7 +847,7 @@ class ProductFournisseur extends Product
 		$sql = "SELECT s.nom as supplier_name, s.rowid as fourn_id,";
 		$sql .= " pfp.rowid as product_fourn_price_id, pfp.ref_fourn,";
 		$sql .= " pfp.price, pfp.quantity, pfp.unitprice, pfp.tva_tx, pfp.charges,";
-		$sql .= " pfp.remise, pfp.remise_percent, pfp.fk_supplier_price_expression, pfp.delivery_time_days";
+		$sql .= " pfp.remise, pfp.remise_percent, pfp.freight_charge, pfp.total, pfp.fk_supplier_price_expression, pfp.delivery_time_days";
 		$sql .= " ,pfp.multicurrency_price, pfp.multicurrency_unitprice, pfp.multicurrency_tx, pfp.fk_multicurrency, pfp.multicurrency_code";
 		$sql .= " FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."product_fournisseur_price as pfp";
 		$sql .= " WHERE s.entity IN (".getEntity('societe').")";
@@ -895,8 +911,11 @@ class ProductFournisseur extends Product
 						$this->ref_fourn                = $record["ref_fourn"]; // deprecated
 						$this->fourn_ref                = $record["ref_fourn"]; // deprecated
 						$this->fourn_price              = $fourn_price;
+						//$this->freight_charge           = $freight_charge;
 						$this->fourn_qty                = $record["quantity"];
 						$this->fourn_remise_percent     = $record["remise_percent"];
+						$this->freight_charge           = $record["freight_charge"];
+						$this->total                    = $record["total"];
 						$this->fourn_remise             = $record["remise"];
 						$this->fourn_unitprice          = $fourn_unitprice;
 						$this->fourn_unitprice_with_discount = $fourn_unitprice_with_discount;

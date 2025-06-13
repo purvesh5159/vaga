@@ -201,6 +201,8 @@ if (empty($reshook)) {
 		}
 		$quantity = price2num(GETPOST("qty", 'alphanohtml'), 'MS');
 		$remise_percent = price2num(GETPOST('remise_percent', 'alpha'));
+		$freight_charge = price2num(GETPOST('freight_charge', 'alpha'));
+		$total = price2num(GETPOST('total', 'alpha'));
 
 		$npr = preg_match('/\*/', GETPOST('tva_tx', 'alpha')) ? 1 : 0;
 		$tva_tx = str_replace('*', '', GETPOST('tva_tx', 'alpha'));
@@ -314,9 +316,9 @@ if (empty($reshook)) {
 					$multicurrency_price = price2num(GETPOST("multicurrency_price", 'alpha'));
 					$multicurrency_code = GETPOST("multicurrency_code", 'alpha');
 
-					$ret = $object->update_buyprice($quantity, $newprice, $user, GETPOST("price_base_type"), $supplier, GETPOST("oselDispo"), $ref_fourn, $tva_tx, GETPOST("charges"), $remise_percent, 0, $npr, $delivery_time_days, $supplier_reputation, array(), '', $multicurrency_price, GETPOST("multicurrency_price_base_type"), $multicurrency_tx, $multicurrency_code, $supplier_description, $barcode, $fk_barcode_type, $extrafield_values);
+					$ret = $object->update_buyprice($quantity, $newprice, $user, GETPOST("price_base_type"), $supplier, GETPOST("oselDispo"), $ref_fourn, $tva_tx, GETPOST("charges"), $remise_percent, $freight_charge, $total, 0, $npr, $delivery_time_days, $supplier_reputation, array(), '', $multicurrency_price, GETPOST("multicurrency_price_base_type"), $multicurrency_tx, $multicurrency_code, $supplier_description, $barcode, $fk_barcode_type, $extrafield_values);
 				} else {
-					$ret = $object->update_buyprice($quantity, $newprice, $user, GETPOST("price_base_type"), $supplier, GETPOST("oselDispo"), $ref_fourn, $tva_tx, GETPOST("charges"), $remise_percent, 0, $npr, $delivery_time_days, $supplier_reputation, array(), '', 0, 'HT', 1, '', $supplier_description, $barcode, $fk_barcode_type, $extrafield_values);
+					$ret = $object->update_buyprice($quantity, $newprice, $user, GETPOST("price_base_type"), $supplier, GETPOST("oselDispo"), $ref_fourn, $tva_tx, GETPOST("charges"), $remise_percent, $freight_charge, $total, 0, $npr, $delivery_time_days, $supplier_reputation, array(), '', 0, 'HT', 1, '', $supplier_description, $barcode, $fk_barcode_type, $extrafield_values);
 				}
 				if ($ret < 0) {
 					$error++;
@@ -693,6 +695,11 @@ if ($id > 0 || $ref) {
 					print '</td>';
 					print '</tr>';
 
+					print '<tr><td>'.$langs->trans("Freight & Other Charge") .'</td>';
+					print '<td><input class="flat" name="freight_charge" size="4" value="'.(GETPOSTISSET('freight_charge') ? price(GETPOST('freight_charge')) : (isset($object->freight_charge) ? vatrate($object->freight_charge) : '')).'"> ';
+					print '</td>';
+					print '</tr>';
+
 					// Currency price qty min
 					print '<tr><td class="fieldrequired">'.$form->textwithpicto($langs->trans("PriceQtyMinCurrency"), $langs->transnoentitiesnoconv("WithoutDiscount")).'</td>';
 					$pricesupplierincurrencytouse = (GETPOST('multicurrency_price') ? GETPOST('multicurrency_price') : (isset($object->fourn_multicurrency_price) ? $object->fourn_multicurrency_price : ''));
@@ -736,10 +743,28 @@ if ($id > 0 || $ref) {
 							}
 						}
 
+						 // Update total cost calculation
+						function updateTotalField() {
+							var price = price2numjs($('input[name=\"multicurrency_price\"]').val());
+							var freight = price2numjs($('input[name=\"freight_charge\"]').val());
+							var discountPercent = price2numjs($('input[name=\"remise_percent\"]').val());
+
+							var discount = (price * discountPercent) / 100;
+							var total = price + freight - discount;
+
+							$('input[name=\"total\"]').val(total.toFixed(2)); // Optional: format to 2 decimals
+						}
+			
 						jQuery(document).ready(function () {
+
 							$('input[name=\"disabled_price\"]').prop('disabled', true);
 							$('select[name=\"disabled_price_base_type\"]').prop('disabled', true);
 							update_price_from_multicurrency();
+
+							$('input[name=\"multicurrency_price\"], input[name=\"remise_percent\"], input[name=\"freight_charge\"]')
+							.on('input change paste keyup', function () {
+								updateTotalField();
+							});
 
 							$('input[name=\"multicurrency_price\"], input[name=\"multicurrency_tx\"]').keyup(function () {
 								update_price_from_multicurrency();
@@ -785,6 +810,11 @@ if ($id > 0 || $ref) {
 				// Discount qty min
 				print '<tr><td>'.$langs->trans("DiscountQtyMin").'</td>';
 				print '<td><input class="flat" name="remise_percent" size="4" value="'.(GETPOSTISSET('remise_percent') ? vatrate(price2num(GETPOST('remise_percent'), '', 2)) : (isset($object->fourn_remise_percent) ? vatrate($object->fourn_remise_percent) : '')).'"> %';
+				print '</td>';
+				print '</tr>';
+
+				print '<tr><td>'.$langs->trans("Total") .'</td>';
+				print '<td><input class="flat" name="total" size="4" value="'.(GETPOSTISSET('total') ? price(GETPOST('total')) : (isset($object->total) ? vatrate($object->total) : '')).'"> ';
 				print '</td>';
 				print '</tr>';
 
@@ -1023,6 +1053,9 @@ if ($id > 0 || $ref) {
 				$nbfields++;
 				print_liste_field_titre("PriceQtyMinHT", $_SERVER["PHP_SELF"], '', '', $param, '', $sortfield, $sortorder, 'right ');
 				$nbfields++;
+
+				
+
 				if (isModEnabled("multicurrency")) {
 					print_liste_field_titre("PriceQtyMinHTCurrency", $_SERVER["PHP_SELF"], '', '', $param, '', $sortfield, $sortorder, 'right ');
 					$nbfields++;
@@ -1035,6 +1068,12 @@ if ($id > 0 || $ref) {
 					print_liste_field_titre("UnitPriceHTCurrency", $_SERVER["PHP_SELF"], "pfp.multicurrency_unitprice", "", $param, '', $sortfield, $sortorder, 'right ');
 					$nbfields++;
 				}
+
+					// possible only when $conf->global->PRODUCT_CHARGES is set purvesh
+				print_liste_field_titre("Freight & Other charge");
+				 
+				print_liste_field_titre("Total");
+
 				if (isModEnabled("multicurrency")) {
 					print_liste_field_titre("Currency", $_SERVER["PHP_SELF"], "", "", $param, '', $sortfield, $sortorder, 'right ');
 					$nbfields++;
@@ -1181,6 +1220,14 @@ if ($id > 0 || $ref) {
 							print price($productfourn->fourn_multicurrency_unitprice);
 							print '</td>';
 						}
+
+						print '<td class="right">';
+						print price2num($productfourn->freight_charge).'';
+						print '</td>';
+
+						print '<td class="right">';
+						print price2num($productfourn->total).'';
+						print '</td>';
 
 						// Currency
 						if (isModEnabled("multicurrency")) {

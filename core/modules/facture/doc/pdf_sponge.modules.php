@@ -777,6 +777,10 @@ class pdf_sponge extends ModelePDFFactures
 					$pdf->SetFont('', '', $default_font_size - 1); // We reposition the default font
 
 					// VAT Rate
+					// if only greater than 0 subrprice than only print price in template purvesh
+					$up_excl_tax = pdf_getlineupexcltax($object, $i, $outputlangs, $hidedetails);
+
+                    if ($this->getColumnStatus('subprice') && $up_excl_tax > 0) {
 					if ($this->getColumnStatus('vat')) {
 						$vat_rate = pdf_getlinevatrate($object, $i, $outputlangs, $hidedetails);
 						$this->printStdColumnContent($pdf, $curY, 'vat', $vat_rate);
@@ -832,7 +836,6 @@ class pdf_sponge extends ModelePDFFactures
 						$this->printStdColumnContent($pdf, $curY, 'totalincltax', $total_incl_tax);
 						$nexY = max($pdf->GetY(), $nexY);
 					}
-
 					// Extrafields
 					if (!empty($object->lines[$i]->array_options)) {
 						foreach ($object->lines[$i]->array_options as $extrafieldColKey => $extrafieldValue) {
@@ -843,6 +846,7 @@ class pdf_sponge extends ModelePDFFactures
 							}
 						}
 					}
+				}
 
 
 					$parameters = array(

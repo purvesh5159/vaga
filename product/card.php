@@ -920,6 +920,8 @@ if (empty($reshook)) {
 
 				$clone->id = null;
 				$clone->ref = GETPOST('clone_ref', 'alphanohtml');
+				//$clone->customproducttype = GETPOST('customproducttype', 'alpha');
+				$clone->array_options['options_customproducttype'] = GETPOST('customproducttype', 'alpha');
 				$clone->status = 0;
 				$clone->status_buy = 0;
 				$clone->barcode = -1;
@@ -930,6 +932,8 @@ if (empty($reshook)) {
 					$clone->context['createfromclone'] = 'createfromclone';
 					$id = $clone->create($user);
 					if ($id > 0) {
+						
+
 						if (GETPOST('clone_composition')) {
 							$result = $clone->clone_associations($object->id, $id);
 							if ($result < 1) {
@@ -2854,6 +2858,12 @@ if (($action == 'clone' && (empty($conf->use_javascript_ajax) || !empty($conf->d
 	// Define confirmation messages
 	$formquestionclone = array(
 		'text' => $langs->trans("ConfirmClone"),
+		   array(
+            'type' => 'other',
+            'name' => 'customproducttype',
+            'label' => $langs->trans("SelectProductType"),
+            'value' => $form->select_customproducttype(GETPOST('customproducttype', 'int'), 'customproducttype', 1, 'maxwidth300')
+        ),
 		array('type' => 'text', 'name' => 'clone_ref', 'label' => $langs->trans("NewRefForClone"), 'value' => empty($tmpcode) ? $langs->trans("CopyOf").' '.$object->ref : $tmpcode, 'morecss'=>'width150'),
 		array('type' => 'checkbox', 'name' => 'clone_content', 'label' => $langs->trans("CloneContentProduct"), 'value' => 1),
 		array('type' => 'checkbox', 'name' => 'clone_categories', 'label' => $langs->trans("CloneCategoriesProduct"), 'value' => 1),

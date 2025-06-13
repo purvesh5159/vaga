@@ -1370,6 +1370,35 @@ class Form
 
 		return $out;
 	}
+   
+   //added customproducttype fields in clone purvesh
+	public function select_customproducttype($selected = '', $htmlname = 'customproducttype', $showempty = 1, $morecss = 'minwidth100')
+	{
+	    global $langs;
+
+	    $out = '<select id="' . $htmlname . '" class="flat ' . $morecss . '" name="' . $htmlname . '">';
+
+	    if (!empty($showempty)) {
+	        $out .= '<option value="">' . ($showempty === 1 ? '&nbsp;' : $langs->trans($showempty)) . '</option>';
+	    }
+
+	    $sql = "SELECT code, label FROM ".MAIN_DB_PREFIX."c_customproducttype WHERE active = 1 ORDER BY label ASC";
+	    $resql = $this->db->query($sql);
+
+	    if ($resql) {
+	        while ($obj = $this->db->fetch_object($resql)) {
+	            $selectedAttr = ($obj->code == $selected) ? ' selected="selected"' : '';
+	            $out .= '<option value="' . dol_escape_htmltag($obj->code) . '"' . $selectedAttr . '>' . dol_escape_htmltag($obj->label) . '</option>';
+	        }
+	    } else {
+	        $out .= '<option value="">' . $langs->trans("Error") . '</option>';
+	    }
+
+	    $out .= '</select>';
+
+	    return $out;
+	}
+
 
 	// phpcs:disable PEAR.NamingConventions.ValidFunctionName.ScopeNotCamelCaps
 

@@ -1013,7 +1013,7 @@ class pdf_vaga extends ModelePDFPropales
                     // Get subprice once at the beginning
                     $up_excl_tax = pdf_getlineupexcltax($object, $i, $outputlangs, $hidedetails);
 
-                    // Only proceed if subprice is greater than 0
+                    // Only proceed if subprice is greater than 0 purvesh
                     if ($up_excl_tax > 0) {
                         if (!empty($object->lines[$i]->array_options)) {
                             foreach ($object->lines[$i]->array_options as $extrafieldColKey => $extrafieldValue) {

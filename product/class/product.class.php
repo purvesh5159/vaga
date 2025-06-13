@@ -209,6 +209,10 @@ class Product extends CommonObject
 	//! Default discount percent
 	public $remise_percent;
 
+	public $freight_charge;
+
+	public $total;
+
 	//! Other local taxes
 	public $localtax1_tx;
 	public $localtax2_tx;
@@ -2092,7 +2096,7 @@ class Product extends CommonObject
 		$result = 0;
 
 		// We do a first search with a select by searching with couple prodfournprice and qty only (later we will search on triplet qty/product_id/fourn_ref)
-		$sql = "SELECT pfp.rowid, pfp.price as price, pfp.quantity as quantity, pfp.remise_percent, pfp.fk_soc,";
+		$sql = "SELECT pfp.rowid, pfp.price as price, pfp.quantity as quantity, pfp.remise_percent, pfp.freight_charge, pfp.total, pfp.fk_soc,";
 		$sql .= " pfp.fk_product, pfp.ref_fourn as ref_supplier, pfp.desc_fourn as desc_supplier, pfp.tva_tx, pfp.default_vat_code, pfp.fk_supplier_price_expression,";
 		$sql .= " pfp.multicurrency_price, pfp.multicurrency_unitprice, pfp.multicurrency_tx, pfp.fk_multicurrency, pfp.multicurrency_code,";
 		$sql .= " pfp.packaging";
@@ -2132,6 +2136,8 @@ class Product extends CommonObject
 				$this->ref_supplier = $obj->ref_supplier; // Ref supplier
 				$this->desc_supplier = $obj->desc_supplier; // desc supplier
 				$this->remise_percent = $obj->remise_percent; // remise percent if present and not typed
+				$this->freight_charge = $obj->freight_charge;
+				$this->total = $obj->total;
 				$this->vatrate_supplier = $obj->tva_tx; // Vat ref supplier
 				$this->default_vat_code_supplier = $obj->default_vat_code; // Vat code supplier
 				$this->fourn_multicurrency_price = $obj->multicurrency_price;
@@ -2146,7 +2152,7 @@ class Product extends CommonObject
 				return $result;
 			} else { // If not found
 				// We do a second search by doing a select again but searching with less reliable criteria: couple qty/id product, and if set fourn_ref or fk_soc.
-				$sql = "SELECT pfp.rowid, pfp.price as price, pfp.quantity as quantity, pfp.remise_percent, pfp.fk_soc,";
+				$sql = "SELECT pfp.rowid, pfp.price as price, pfp.quantity as quantity, pfp.remise_percent, pfp.freight_charge, pfp.total, pfp.fk_soc,";
 				$sql .= " pfp.fk_product, pfp.ref_fourn as ref_supplier, pfp.desc_fourn as desc_supplier, pfp.tva_tx, pfp.default_vat_code, pfp.fk_supplier_price_expression,";
 				$sql .= " pfp.multicurrency_price, pfp.multicurrency_unitprice, pfp.multicurrency_tx, pfp.fk_multicurrency, pfp.multicurrency_code,";
 				$sql .= " pfp.packaging";
@@ -2197,6 +2203,8 @@ class Product extends CommonObject
 						$this->ref_supplier = $obj->ref_supplier; // Ref supplier
 						$this->desc_supplier = $obj->desc_supplier; // desc supplier
 						$this->remise_percent = $obj->remise_percent; // remise percent if present and not typed
+						$this->freight_charge = $obj->freight_charge;
+						$this->total          = $obj->total;
 						$this->vatrate_supplier = $obj->tva_tx; // Vat ref supplier
 						$this->default_vat_code_supplier = $obj->default_vat_code; // Vat code supplier
 						$this->fourn_multicurrency_price = $obj->multicurrency_price;
@@ -2746,7 +2754,7 @@ class Product extends CommonObject
 						$this->prices_by_qty_id[0] = $result["rowid"];
 						// Récuperation de la liste des prix selon qty si flag positionné
 						if ($this->prices_by_qty[0] == 1) {
-							$sql = "SELECT rowid,price, unitprice, quantity, remise_percent, remise, remise, price_base_type";
+							$sql = "SELECT rowid,price, unitprice, quantity, remise_percent, remise, freight_charge, total, price_base_type";
 							$sql .= " FROM ".$this->db->prefix()."product_price_by_qty";
 							$sql .= " WHERE fk_product_price = ".((int) $this->prices_by_qty_id[0]);
 							$sql .= " ORDER BY quantity ASC";
@@ -2761,7 +2769,9 @@ class Product extends CommonObject
 									$resultat[$ii]["unitprice"] = $result["unitprice"];
 									$resultat[$ii]["quantity"] = $result["quantity"];
 									$resultat[$ii]["remise_percent"] = $result["remise_percent"];
-									//$resultat[$ii]["remise"]= $result["remise"];                    // deprecated
+									$resultat[$ii]["remise"]= $result["remise"];                    // deprecated
+                                    $resultat[$ii]["freight_charge"]= $result["freight_charge"]; 
+									$resultat[$ii]["total"]= $result["total"];  
 									$resultat[$ii]["price_base_type"] = $result["price_base_type"];
 									$ii++;
 								}
@@ -2803,7 +2813,7 @@ class Product extends CommonObject
 							$this->prices_by_qty_id[$i] = (!empty($result["rowid"]) ? $result["rowid"] : 0);
 							// Récuperation de la liste des prix selon qty si flag positionné
 							if ($this->prices_by_qty[$i] == 1) {
-								$sql = "SELECT rowid, price, unitprice, quantity, remise_percent, remise, price_base_type";
+								$sql = "SELECT rowid, price, unitprice, quantity, remise_percent, remise, freight_charge, total, price_base_type";
 								$sql .= " FROM ".$this->db->prefix()."product_price_by_qty";
 								$sql .= " WHERE fk_product_price = ".((int) $this->prices_by_qty_id[$i]);
 								$sql .= " ORDER BY quantity ASC";
@@ -2819,6 +2829,8 @@ class Product extends CommonObject
 										$resultat[$ii]["quantity"] = $result["quantity"];
 										$resultat[$ii]["remise_percent"] = $result["remise_percent"];
 										$resultat[$ii]["remise"] = $result["remise"]; // deprecated
+										$resultat[$ii]["freight_charge"] = $result["freight_charge"]; // deprecated
+										$resultat[$ii]["freight_charge"] = $result["total"]; 
 										$resultat[$ii]["price_base_type"] = $result["price_base_type"];
 										$ii++;
 									}
