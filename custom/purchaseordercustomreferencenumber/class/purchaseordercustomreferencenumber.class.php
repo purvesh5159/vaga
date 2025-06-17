@@ -1233,6 +1233,120 @@ class PurchaseOrderCustomReferenceNumber extends CommonObject
 		}
 	}
 
+	public function getNextNumRefForfso()
+	{
+		global $langs, $conf;
+		$langs->load("purchaseordercustomreferencenumber@purchaseordercustomreferencenumber");
+
+		if (!getDolGlobalString('COMMANDE_SUPPLIER_ADDON_NUMBER_CUSTOM_FSO')) {
+			$conf->global->PRODUCTCUSTOMREFERENCENUMBER_MYOBJECT_ADDON = 'mod_custom_commande_fournisseur_muguet_fso';
+		}
+
+		$mod = getDolGlobalString('COMMANDE_SUPPLIER_ADDON_NUMBER_CUSTOM_FSO');
+		if (!$mod) {
+		    $mod = 'mod_custom_commande_fournisseur_muguet_fso'; // fallback value
+		    $conf->global->COMMANDE_SUPPLIER_ADDON_NUMBER_CUSTOM_FSO = $mod;
+		}
+
+
+		if (getDolGlobalString('COMMANDE_SUPPLIER_ADDON_NUMBER_CUSTOM_FSO')) {
+			$mybool = false;
+
+			$file = getDolGlobalString('COMMANDE_SUPPLIER_ADDON_NUMBER_CUSTOM_FSO').".php";
+			$classname = getDolGlobalString('COMMANDE_SUPPLIER_ADDON_NUMBER_CUSTOM_FSO');
+
+			// Include file with class
+			$dirmodels = array_merge(array('/'), (array) $conf->modules_parts['models']);
+			foreach ($dirmodels as $reldir) {
+				$dir = dol_buildpath($reldir."core/modules/purchaseordercustomreferencenumber/");
+
+				// Load file with numbering class (if found)
+				$mybool |= @include_once $dir.$file;
+			}
+
+			if ($mybool === false) {
+				dol_print_error('', "Failed to include file ".$file);
+				return '';
+			}
+
+			if (class_exists($classname)) {
+				$obj = new $classname();
+				$numref = $obj->getNextValue($this);
+
+				if ($numref != '' && $numref != '-1') {
+					return $numref;
+				} else {
+					$this->error = $obj->error;
+					//dol_print_error($this->db,get_class($this)."::getNextNumRef ".$obj->error);
+					return "";
+				}
+			} else {
+				print $langs->trans("Error")." ".$langs->trans("ClassNotFound").' '.$classname;
+				return "";
+			}
+		} else {
+			print $langs->trans("ErrorNumberingModuleNotSetup", $this->element);
+			return "";
+		}
+	}
+
+	public function getNextNumRefForlso()
+	{
+		global $langs, $conf;
+		$langs->load("purchaseordercustomreferencenumber@purchaseordercustomreferencenumber");
+
+		if (!getDolGlobalString('COMMANDE_SUPPLIER_ADDON_NUMBER_CUSTOM_LSO')) {
+			$conf->global->PRODUCTCUSTOMREFERENCENUMBER_MYOBJECT_ADDON = 'mod_custom_commande_fournisseur_muguet_lso';
+		}
+
+		$mod = getDolGlobalString('COMMANDE_SUPPLIER_ADDON_NUMBER_CUSTOM_LSO');
+		if (!$mod) {
+		    $mod = 'mod_custom_commande_fournisseur_muguet_lso'; // fallback value
+		    $conf->global->COMMANDE_SUPPLIER_ADDON_NUMBER_CUSTOM_LSO = $mod;
+		}
+
+		if (getDolGlobalString('COMMANDE_SUPPLIER_ADDON_NUMBER_CUSTOM_LSO')) {
+			$mybool = false;
+
+			$file = getDolGlobalString('COMMANDE_SUPPLIER_ADDON_NUMBER_CUSTOM_LSO').".php";
+			$classname = getDolGlobalString('COMMANDE_SUPPLIER_ADDON_NUMBER_CUSTOM_LSO');
+
+			// Include file with class
+			$dirmodels = array_merge(array('/'), (array) $conf->modules_parts['models']);
+			foreach ($dirmodels as $reldir) {
+				$dir = dol_buildpath($reldir."core/modules/purchaseordercustomreferencenumber/");
+
+				// Load file with numbering class (if found)
+				$mybool |= @include_once $dir.$file;
+			}
+
+			if ($mybool === false) {
+				dol_print_error('', "Failed to include file ".$file);
+				return '';
+			}
+
+			if (class_exists($classname)) {
+				$obj = new $classname();
+				$numref = $obj->getNextValue($this);
+
+				if ($numref != '' && $numref != '-1') {
+					return $numref;
+				} else {
+					$this->error = $obj->error;
+					//dol_print_error($this->db,get_class($this)."::getNextNumRef ".$obj->error);
+					return "";
+				}
+			} else {
+				print $langs->trans("Error")." ".$langs->trans("ClassNotFound").' '.$classname;
+				return "";
+			}
+		} else {
+			print $langs->trans("ErrorNumberingModuleNotSetup", $this->element);
+			return "";
+		}
+	}
+
+
 	/**
 	 *  Create a document onto disk according to template module.
 	 *

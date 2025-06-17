@@ -166,6 +166,42 @@ class InterfacePurchaseOrderCustomReferenceNumberTriggers extends DolibarrTrigge
 				dol_print_error($this->db);
 			}
 		}
+
+		if ($object->array_options['options_purchaseordertype'] == 'LSO') {
+			$custompurchaseordertype = 'LSO';
+			dol_include_once('/purchaseordercustomreferencenumber/class/purchaseordercustomreferencenumber.class.php');
+			$purchaseordercustomreferenceobject = new PurchaseOrderCustomReferenceNumber($this->db);
+
+			$num = $purchaseordercustomreferenceobject->getNextNumRefForlso();
+			$num = $num . '-R0';
+
+			$sql = 'UPDATE ' . $this->db->prefix() . "commande_fournisseur";
+			$sql .= " SET ref='" . $this->db->escape($num) . "'";
+			$sql .= " WHERE rowid = " . ((int) $object->id);
+
+			$resql = $this->db->query($sql);
+			if (!$resql) {
+				dol_print_error($this->db);
+			}
+		}
+
+		if ($object->array_options['options_purchaseordertype'] == 'FSO') {
+			$custompurchaseordertype = 'FSO';
+			dol_include_once('/purchaseordercustomreferencenumber/class/purchaseordercustomreferencenumber.class.php');
+			$purchaseordercustomreferenceobject = new PurchaseOrderCustomReferenceNumber($this->db);
+
+			$num = $purchaseordercustomreferenceobject->getNextNumRefForfso();
+			$num = $num . '-R0';
+
+			$sql = 'UPDATE ' . $this->db->prefix() . "commande_fournisseur";
+			$sql .= " SET ref='" . $this->db->escape($num) . "'";
+			$sql .= " WHERE rowid = " . ((int) $object->id);
+
+			$resql = $this->db->query($sql);
+			if (!$resql) {
+				dol_print_error($this->db);
+			}
+		}
 	}
 	return 0;
 	}

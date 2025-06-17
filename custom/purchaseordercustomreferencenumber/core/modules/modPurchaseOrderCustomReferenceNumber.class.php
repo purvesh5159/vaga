@@ -178,6 +178,20 @@ class modPurchaseOrderCustomReferenceNumber extends DolibarrModules
 		$this->const[$r][4] = 0;
 		$r++;
 
+		$this->const[$r][0] = "COMMANDE_SUPPLIER_ADDON_NUMBER_CUSTOM_FSO";
+		$this->const[$r][1] = "chaine";
+		$this->const[$r][2] = "mod_custom_commande_fournisseur_muguet_fso";
+		$this->const[$r][3] = 'Nom du gestionnaire de numerotation des commandes fournisseur';
+		$this->const[$r][4] = 0;
+		$r++;
+
+		$this->const[$r][0] = "COMMANDE_SUPPLIER_ADDON_NUMBER_CUSTOM_LSO";
+		$this->const[$r][1] = "chaine";
+		$this->const[$r][2] = "mod_custom_commande_fournisseur_muguet_lso";
+		$this->const[$r][3] = 'Nom du gestionnaire de numerotation des commandes fournisseur';
+		$this->const[$r][4] = 0;
+		$r++;
+
 		// Some keys to add into the overwriting translation tables
 		/*$this->overwrite_translation = array(
 			'en_US:ParentCompany'=>'Parent company or reseller',

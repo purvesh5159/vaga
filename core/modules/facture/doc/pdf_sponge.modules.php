@@ -2178,7 +2178,7 @@ class pdf_sponge extends ModelePDFFactures
 			if (dol_strlen($ref_customer) >= 50) {
 				// If ref_customer is long, allow multiple lines and adjust height
 				$pdf->SetFont('', '', 8);
-				$pdf->MultiCell($w, 6, $outputlangs->transnoentities("RefCustomer") . " :\n" . $ref_customer_trunc, '', 'R');
+				$pdf->MultiCell($w, 6, $outputlangs->transnoentities("RefCustomer") . " : " . $ref_customer_trunc, '', 'R');
 				$posy += 4; // Extra vertical space to account for line wrap
 			} else {
 				// Standard short version
@@ -2290,7 +2290,7 @@ class pdf_sponge extends ModelePDFFactures
 		$top_shift = 0;
 		$shipp_shift = 0;
 		// Show list of linked objects
-		$current_y = $pdf->getY();
+		$current_y = $pdf->getY() - 7;
 		$posy = pdf_writeLinkedObjects($pdf, $object, $outputlangs, $posx, $posy, $w, 3, 'R', $default_font_size);
 		if ($current_y < $pdf->getY()) {
 			$top_shift = $pdf->getY() - $current_y;

@@ -4019,6 +4019,22 @@ if ($action == 'create') {
 					}
 				}
 
+				//added reopen invoice purvesh
+				$token = newToken();
+
+				if ($object->status == 1) { // If invoice is paid
+					print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?facid='.$object->id.'&action=reopen&token='.$token.'">Reopen Invoice</a>';
+				}
+
+				if ($action == 'reopen') {
+				$result = $object->setDraft($user);
+					if ($result > 0) {
+						setEventMessages("Invoice reopened successfully", null, 'mesgs');
+						header("Location: ".$_SERVER["PHP_SELF"]."?id=".$object->id);
+						exit;
+					}
+				}
+
 				$discount = new DiscountAbsolute($db);
 				$result = $discount->fetch(0, 0, $object->id);
 

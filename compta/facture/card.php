@@ -5675,7 +5675,84 @@ if ($action == 'create') {
 					$params['attr']['title'] = $langs->trans('DisabledBecauseDispatchedInBookkeeping');
 					print dolGetButtonAction($langs->trans('Modify'), '', 'default', '#', '', false, $params);
 				}
+
+				//added reopen invoice purvesh
+				$token = newToken();
+
+				if ($object->status == 1) { // If invoice is paid
+					print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?facid='.$object->id.'&action=reopen&token='.$token.'">Reopen Invoice</a>';
+				}
 			}
+
+
+		if ($action == 'reopen') {
+		$result = $object->setDraft($user);
+			if ($result > 0) {
+				setEventMessages("Invoice reopened successfully", null, 'mesgs');
+				header("Location: ".$_SERVER["PHP_SELF"]."?id=".$object->id);
+				exit;
+			}
+		}
+
+		// if ($action == 'reopen') {
+		// $result = $object->setDraft($user);
+
+		// 		require_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
+		// 		require_once DOL_DOCUMENT_ROOT.'/compta/paiement/class/paiement.class.php';
+
+		// 		$invoiceid = GETPOST('facid', 'int');
+		// 		$invoice = new Facture($db);
+
+		// 		if ($invoice->fetch($invoiceid) > 0) {
+		// 			// Step 1: Get all payment IDs linked to this invoice
+		// 			$sql = "SELECT fk_paiement FROM ".MAIN_DB_PREFIX."paiement_facture WHERE fk_facture = ".((int) $invoice->id);
+		// 			$resql = $db->query($sql);
+
+		// 			if ($resql) {
+		// 				while ($obj = $db->fetch_object($resql)) {
+		// 					$payment_id = $obj->fk_paiement;
+
+		// 					// Step 2: Delete the link from llx_paiement_facture
+		// 					$sql_delete_link = "DELETE FROM ".MAIN_DB_PREFIX."paiement_facture 
+		// 										WHERE fk_facture = ".((int) $invoice->id)." 
+		// 										AND fk_paiement = ".((int) $payment_id);
+		// 					$db->query($sql_delete_link);
+
+		// 					// Step 3: Check if payment is still linked to other invoices
+		// 					$sql_check = "SELECT COUNT(*) as nb FROM ".MAIN_DB_PREFIX."paiement_facture WHERE fk_paiement = ".((int) $payment_id);
+		// 					$res_check = $db->query($sql_check);
+		// 					$obj_check = $db->fetch_object($res_check);
+
+		// 					if ($obj_check->nb == 0) {
+		// 						// Step 4: Load and delete the payment if unused
+		// 						$payment = new Paiement($db);
+		// 						if ($payment->fetch($payment_id) > 0) {
+		// 							$result = $payment->delete($user);
+		// 							if ($result > 0) {
+		// 								setEventMessages("Payment #$payment_id deleted successfully", null, 'mesgs');
+		// 							} else {
+		// 								setEventMessages("Error deleting payment #$payment_id", null, 'errors');
+		// 							}
+		// 						}
+		// 					} else {
+		// 						setEventMessages("Payment #$payment_id unlinked from invoice but not deleted (still used)", null, 'warnings');
+		// 					}
+		// 				}
+		// 			} else {
+		// 				setEventMessages("No payments found for this invoice", null, 'warnings');
+		// 			}
+		// 		} else {
+		// 			setEventMessages("Invoice not found", null, 'errors');
+		// 		}
+
+		// 	if ($result > 0) {
+		// 		setEventMessages("Invoice reopened successfully", null, 'mesgs');
+		// 		header("Location: ".$_SERVER["PHP_SELF"]."?id=".$object->id);
+		// 		exit;
+		// 	}
+		// }
+
+
 
 			$discount = new DiscountAbsolute($db);
 			$result = $discount->fetch(0, $object->id);
